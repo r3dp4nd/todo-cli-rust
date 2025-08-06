@@ -2,13 +2,13 @@ mod command;
 mod file;
 mod tasks;
 
-use crate::command::Command;
+use crate::command::{Command, ListFilter};
 use crate::tasks::Task;
 
 fn print_usage() {
     println!("Uso:");
     println!("  add <descripcion>");
-    println!("  list");
+    println!("  list [all|pending|done]");
     println!("  done <id>");
 }
 
@@ -27,11 +27,17 @@ fn main() {
             file::save_tasks("tasks.db", &tasks);
             println!("Tarea agregada.");
         }
-        Command::List => {
-            if tasks.is_empty() {
+        Command::List { filter } => {
+            let filtered: Vec<&Task> = match filter {
+                ListFilter::All => tasks.iter().collect(),
+                ListFilter::Done => tasks.iter().filter(|t| t.done).collect(),
+                ListFilter::Pending => tasks.iter().filter(|t| !t.done).collect(),
+            };
+
+            if filtered.is_empty() {
                 println!("No hay tareas.");
             } else {
-                for task in &tasks {
+                for task in filtered {
                     let status = if task.done { "[✓]" } else { "[ ]" };
                     let deadline = task.deadline.as_deref().unwrap_or("sin fecha");
                     println!(

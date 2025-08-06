@@ -1,11 +1,19 @@
 use std::env;
 
+pub enum ListFilter {
+    All,
+    Done,
+    Pending,
+}
+
 pub enum Command {
     Add {
         description: String,
         deadline: Option<String>,
     },
-    List,
+    List {
+        filter: ListFilter,
+    },
     Done {
         id: u32,
     },
@@ -41,7 +49,19 @@ impl Command {
                     deadline: date,
                 }
             }
-            "list" => Command::List,
+            "list" => {
+                let filter = if args.len() >= 3 {
+                    match args[2].as_str() {
+                        "done" => ListFilter::Done,
+                        "pending" => ListFilter::Pending,
+                        _ => ListFilter::All,
+                    }
+                } else {
+                    ListFilter::All
+                };
+
+                Command::List { filter }
+            }
             "done" => {
                 if args.len() < 3 {
                     return Command::Help;
