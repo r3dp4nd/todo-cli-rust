@@ -2,6 +2,13 @@
 
 Proyecto basico para agregar tareas mediante un programa de linea de comandos
 
+Funcionalidades
+
+- [X] Agregar tareas
+- [X] Listar tareas
+- [X] Marcar como terminado
+
+
 - Agrega una tarea
 
 ```bash
