@@ -40,9 +40,14 @@ fn main() {
                 for task in filtered {
                     let status = if task.done { "[✓]" } else { "[ ]" };
                     let deadline = task.deadline.as_deref().unwrap_or("sin fecha");
+                    let expired = if !task.done && task.is_expired() {
+                        " ⚠ expired"
+                    } else {
+                        ""
+                    };
                     println!(
-                        "{} {} - {} (vence: {})",
-                        status, task.id, task.description, deadline
+                        "{} {} - {} (vence: {}){}",
+                        status, task.id, task.description, deadline, expired
                     );
                 }
             }

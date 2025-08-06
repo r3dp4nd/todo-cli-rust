@@ -1,3 +1,5 @@
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
+
 pub struct Task {
     pub id: u32,
     pub description: String,
@@ -44,5 +46,31 @@ impl Task {
             done,
             deadline,
         })
+    }
+
+    pub fn deadline_as_time(&self) -> Option<SystemTime> {
+        let date_str = self.deadline.as_ref()?;
+
+        let parts: Vec<&str> = date_str.split('-').collect();
+        if parts.len() != 3 {
+            return None;
+        }
+
+        let year = parts[0].parse::<u64>().ok()?;
+        let month = parts[1].parse::<u64>().ok()?;
+        let day = parts[2].parse::<u64>().ok()?;
+
+        let day_since_epoch = (year - 1970) * 365 + (month - 1) * 30 + (day - 1);
+
+        Some(UNIX_EPOCH + Duration::from_secs(day_since_epoch as u64 * 24 * 60 * 60))
+    }
+
+    pub fn is_expired(&self) -> bool {
+        if let Some(deadline_time) = self.deadline_as_time() {
+            if let Ok(now) = SystemTime::now().duration_since(UNIX_EPOCH) {
+                return deadline_time < UNIX_EPOCH + now;
+            }
+        }
+        false
     }
 }
