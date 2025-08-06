@@ -17,6 +17,11 @@ pub enum Command {
     Done {
         id: u32,
     },
+    Edit {
+        id: u32,
+        new_desc: Option<String>,
+        new_deadline: Option<String>,
+    },
     Help,
 }
 
@@ -72,6 +77,56 @@ impl Command {
                     Err(_) => Command::Help,
                 }
             }
+            "edit" => {
+                if args.len() < 3 {
+                    return Command::Help;
+                }
+
+                let id = args[2].parse::<u32>().unwrap_or_else(|_| {
+                    println!("ID valido");
+                    std::process::exit(1)
+                });
+
+                let mut new_desc = None;
+                let mut new_deadline = None;
+                let mut i = 3;
+
+                while i < args.len() {
+                    match args[i].as_str() {
+                        "--desc" => {
+                            i += 1;
+                            if i < args.len() {
+                                new_desc = Some(args[i].clone());
+                            }
+                        }
+                        "--date" => {
+                            i += 1;
+                            if i < args.len() {
+                                let date = args[i].clone();
+                                if is_valid_date(&date) {
+                                    new_deadline = Some(date);
+                                } else {
+                                    println!("Formato de fecha inválido. Usa YYYY-MM-DD.");
+                                    std::process::exit(1);
+                                }
+                            }
+                        }
+                        _ => {}
+                    }
+                    i += 1;
+                }
+                if new_desc.is_none() && new_deadline.is_none() {
+                    println!("Nada que editar. Usa --desc o --date.");
+                    std::process::exit(1);
+                }
+
+                Command::Edit {
+                    id,
+                    new_desc,
+                    new_deadline,
+                }
+            }
+
             _ => Command::Help,
         }
     }

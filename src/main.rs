@@ -60,6 +60,24 @@ fn main() {
             }
             None => println!("Tarea con ID {} no encontrada.", id),
         },
+        Command::Edit {
+            id,
+            new_desc,
+            new_deadline,
+        } => {
+            if let Some(task) = tasks.iter_mut().find(|t| t.id == id) {
+                if let Some(desc) = new_desc {
+                    task.description = desc;
+                }
+                if let Some(deadline) = new_deadline {
+                    task.deadline = Some(deadline);
+                }
+                file::save_tasks("tasks.db", &tasks);
+                println!("Tarea {} editada con éxito.", id);
+            } else {
+                println!("No se encontró tarea con ID {}.", id);
+            }
+        }
         _ => print_usage(),
     }
 }
