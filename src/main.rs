@@ -27,13 +27,22 @@ fn main() {
         "add" => {
             if args.len() < 3 {
                 println!("Falta la descripción de la tarea.");
+                return;
+            }
+
+            let (description, deadline) = if args.len() >= 4 {
+                let deadline = args.last().unwrap().to_string();
+                let description = args[2..args.len() - 1].join(" ");
+                (description, Some(deadline))
             } else {
                 let description = args[2..].join(" ");
-                let task = Task::new(tasks.len() as u32, description);
-                tasks.push(task);
-                file::save_tasks("tasks.db", &tasks);
-                println!("Tarea agregada.");
-            }
+                (description, None)
+            };
+
+            let task = Task::new(tasks.len() as u32, description, deadline);
+            tasks.push(task);
+            file::save_tasks("tasks.db", &tasks);
+            println!("Tarea agregada.");
         }
         "list" => {
             if tasks.is_empty() {
@@ -41,7 +50,11 @@ fn main() {
             } else {
                 for task in &tasks {
                     let status = if task.done { "[✓]" } else { "[ ]" };
-                    println!("{} {} - {}", status, task.id, task.description);
+                    let deadline = task.deadline.as_deref().unwrap_or("sin fecha");
+                    println!(
+                        "{} {} - {} (vence: {})",
+                        status, task.id, task.description, deadline
+                    );
                 }
             }
         }
